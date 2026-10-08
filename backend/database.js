@@ -349,6 +349,38 @@ function initSchema() {
       last_sync DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  // Seed baseline institutions and users if empty
+  const instCheck = db.prepare('SELECT COUNT(*) as c FROM institutions').get();
+  if (!instCheck || instCheck.c === 0) {
+    const { institutions, users } = require('./initialData');
+    const insertInst = db.prepare(`
+      INSERT OR REPLACE INTO institutions (id, name, code, short_name, category, address, phone, email, website)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    institutions.forEach(inst => {
+      insertInst.run(
+        inst.id,
+        inst.name,
+        inst.code,
+        inst.short,
+        inst.cat,
+        'Belhekar Educational Campus, Sangamner-Pune Highway, Maharashtra 413714',
+        '+91 2425 224500 / 9822001122',
+        `contact@${inst.code.toLowerCase().replace(/[^a-z]/g, '')}.belhekar.edu.in`,
+        'https://belhekar.edu.in'
+      );
+    });
+
+    const insertUser = db.prepare(`
+      INSERT OR REPLACE INTO users (id, institution_id, username, password_hash, full_name, email, role, designation)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    users.forEach(usr => {
+      insertUser.run(usr.id, usr.institution_id, usr.u, usr.p, usr.name, usr.email, usr.role, usr.desig);
+    });
+    console.log('✅ Baseline 12 Institutions and 7 Portal Users initialized into database.');
+  }
+
   console.log('✅ In-memory database schema initialized.');
 }
 
@@ -377,9 +409,15 @@ async function syncTableToMongo(tableName) {
     if (!Model) return;
 
     const rows = originalPrepare(`SELECT * FROM ${tableName}`).all();
-    await Model.deleteMany({});
     if (rows.length > 0) {
-      await Model.insertMany(rows);
+      const ops = rows.map(row => ({
+        updateOne: {
+          filter: { id: row.id },
+          update: { $set: row },
+          upsert: true
+        }
+      }));
+      await Model.bulkWrite(ops);
     }
   } catch (err) {
     console.warn(`⚠️ MongoDB Atlas sync note for ${tableName}:`, err.message);
@@ -401,19 +439,6 @@ db.prepare = function(sql) {
   return stmt;
 };
 
-// Ensure baseline seed dataset is available in-memory
-function ensureSeedData() {
-  const checkInst = originalPrepare('SELECT COUNT(*) as c FROM institutions').get();
-  if (!checkInst || checkInst.c === 0) {
-    try {
-      const { seedDatabase } = require('./seed');
-      seedDatabase();
-    } catch (e) {
-      console.warn('Seed fallback note:', e.message);
-    }
-  }
-}
-
 // Hydrate in-memory tables from MongoDB Atlas
 async function hydrateFromMongo() {
   const mongo = require('./mongo');
@@ -429,7 +454,6 @@ async function hydrateFromMongo() {
 
   if (mongo.mongoose.connection.readyState !== 1) {
     console.warn('⚠️ MongoDB Atlas connection pending or IP not whitelisted. Baseline in-memory dataset is ready.');
-    ensureSeedData();
     return;
   }
 
@@ -465,9 +489,14 @@ async function hydrateFromMongo() {
     }
   }
 
-  ensureSeedData();
   console.log('🎉 Dataset ready and synchronized with MongoDB Atlas!');
 }
+
+db.hydrateFromMongo = hydrateFromMongo;
+db.syncTableToMongo = syncTableToMongo;
+db.originalPrepare = originalPrepare;
+
+module.exports = db;
 
 // Auto-hydrate whenever Mongoose connects in background
 try {
@@ -478,15 +507,4 @@ try {
   });
 } catch (e) {}
 
-ensureSeedData();
-
-
-  console.log('🎉 Belhekar ERP store ready with full dataset!');
-}
-
-db.hydrateFromMongo = hydrateFromMongo;
-db.syncTableToMongo = syncTableToMongo;
-db.originalPrepare = originalPrepare;
-
-module.exports = db;
 

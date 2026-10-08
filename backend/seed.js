@@ -404,7 +404,9 @@ function seedDatabase() {
   // 13. Sync all 19 collections to MongoDB Atlas
   syncToMongoDB().then(() => {
     console.log('🎉 Belhekar ERP Database seeding completed flawlessly!');
-    process.exit(0);
+    if (require.main === module) {
+      process.exit(0);
+    }
   });
 }
 
@@ -420,8 +422,14 @@ async function syncToMongoDB() {
     for (const [table, Model] of Object.entries(mongo.modelsMap)) {
       const rows = db.originalPrepare(`SELECT * FROM ${table}`).all();
       if (rows.length > 0) {
-        await Model.deleteMany({});
-        await Model.insertMany(rows);
+        const ops = rows.map(row => ({
+          updateOne: {
+            filter: { id: row.id },
+            update: { $set: row },
+            upsert: true
+          }
+        }));
+        await Model.bulkWrite(ops);
         console.log(` ✅ ${table}: ${rows.length} records saved to MongoDB Atlas`);
       }
     }
