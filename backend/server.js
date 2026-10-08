@@ -9,6 +9,14 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Handle malformed JSON request bodies gracefully
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && (err.status === 400 || err.statusCode === 400)) {
+    return res.status(400).json({ error: 'Malformed JSON payload' });
+  }
+  next(err);
+});
+
 // Helper for audit logging
 function logAudit(instId, username, role, module, action, details, ip = '127.0.0.1') {
   try {
@@ -1409,6 +1417,21 @@ app.get('/api/system/backup', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Serve Frontend static build if available
+const path = require('path');
+const fs = require('fs');
+const distPath = path.resolve(__dirname, '../frontend/dist');
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.join(distPath, 'index.html'));
+    }
+    next();
+  });
+}
 
 // Start Express Server after hydrating dataset from MongoDB Atlas
 async function startServer() {

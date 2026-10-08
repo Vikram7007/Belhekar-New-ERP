@@ -33,6 +33,12 @@ export default function LoginPage({ institutions, onLoginSuccess }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [activeRoleChip, setActiveRoleChip] = useState('');
 
+  React.useEffect(() => {
+    if (institutions?.length > 0 && (!selectedInstId || !institutions.some(i => i.id === Number(selectedInstId)))) {
+      setSelectedInstId(institutions[0].id);
+    }
+  }, [institutions, selectedInstId]);
+
   const handleSelectPreset = (preset) => {
     setUsername(preset.u);
     setPassword(preset.p);
