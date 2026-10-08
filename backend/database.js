@@ -401,20 +401,35 @@ db.prepare = function(sql) {
   return stmt;
 };
 
-// Hydrate in-memory tables from MongoDB Atlas at startup
+// Ensure baseline seed dataset is available in-memory
+function ensureSeedData() {
+  const checkInst = originalPrepare('SELECT COUNT(*) as c FROM institutions').get();
+  if (!checkInst || checkInst.c === 0) {
+    try {
+      const { seedDatabase } = require('./seed');
+      seedDatabase();
+    } catch (e) {
+      console.warn('Seed fallback note:', e.message);
+    }
+  }
+}
+
+// Hydrate in-memory tables from MongoDB Atlas
 async function hydrateFromMongo() {
   const mongo = require('./mongo');
-  console.log('🍃 Connecting to MongoDB Atlas to load dataset...');
 
   if (mongo.mongoose.connection.readyState !== 1) {
+    console.log('🍃 Connecting to MongoDB Atlas to load dataset...');
     await new Promise((resolve) => {
       mongo.mongoose.connection.once('open', resolve);
-      setTimeout(resolve, 8000);
+      mongo.mongoose.connection.once('connected', resolve);
+      setTimeout(resolve, 4000);
     });
   }
 
   if (mongo.mongoose.connection.readyState !== 1) {
-    console.warn('⚠️ Warning: MongoDB Atlas not connected within 8 seconds.');
+    console.warn('⚠️ MongoDB Atlas connection pending or IP not whitelisted. Baseline in-memory dataset is ready.');
+    ensureSeedData();
     return;
   }
 
@@ -449,7 +464,24 @@ async function hydrateFromMongo() {
       console.warn(`Could not hydrate ${table} from MongoDB Atlas:`, err.message);
     }
   }
-  console.log('🎉 All MongoDB Atlas collections loaded successfully into in-memory store!');
+
+  ensureSeedData();
+  console.log('🎉 Dataset ready and synchronized with MongoDB Atlas!');
+}
+
+// Auto-hydrate whenever Mongoose connects in background
+try {
+  const mongo = require('./mongo');
+  mongo.mongoose.connection.on('connected', () => {
+    console.log('🍃 MongoDB Atlas connected! Running cloud sync...');
+    hydrateFromMongo();
+  });
+} catch (e) {}
+
+ensureSeedData();
+
+
+  console.log('🎉 Belhekar ERP store ready with full dataset!');
 }
 
 db.hydrateFromMongo = hydrateFromMongo;

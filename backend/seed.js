@@ -431,6 +431,11 @@ async function syncToMongoDB() {
   }
 }
 
-seedDatabase();
+if (require.main === module) {
+  seedDatabase();
+}
+
+module.exports = { seedDatabase, syncToMongoDB };
+
 
 

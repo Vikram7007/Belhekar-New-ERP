@@ -33,9 +33,27 @@ function logAudit(instId, username, role, module, action, details, ip = '127.0.0
 // -------------------------------------------------------------
 // 1. INSTITUTIONS (All 12 Colleges & Schools)
 // -------------------------------------------------------------
-app.get('/api/institutions', (req, res) => {
-  const rows = db.prepare('SELECT * FROM institutions ORDER BY id ASC').all();
+app.get('/api/institutions', async (req, res) => {
+  let rows = db.prepare('SELECT * FROM institutions ORDER BY id ASC').all();
+  if (rows.length === 0) {
+    try {
+      await db.hydrateFromMongo();
+      rows = db.prepare('SELECT * FROM institutions ORDER BY id ASC').all();
+    } catch (e) {
+      console.warn('Hydration on demand error:', e.message);
+    }
+  }
   res.json(rows);
+});
+
+app.all('/api/system/rehydrate', async (req, res) => {
+  try {
+    await db.hydrateFromMongo();
+    const instCount = db.prepare('SELECT COUNT(*) as c FROM institutions').get().c;
+    res.json({ success: true, institutions: instCount, message: 'Hydrated successfully from MongoDB Atlas' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/institutions/:id', (req, res) => {
