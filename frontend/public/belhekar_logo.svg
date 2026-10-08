@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 320" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d4af37" />
+      <stop offset="50%" stop-color="#c5a059" />
+      <stop offset="100%" stop-color="#997a36" />
+    </linearGradient>
+    <linearGradient id="navyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+
+  <!-- Top Stars -->
+  <!-- Center top star -->
+  <polygon points="150,12 153.5,22.5 164.5,22.5 155.5,29 159,39.5 150,33 141,39.5 144.5,29 135.5,22.5 146.5,22.5" fill="url(#goldGrad)" />
+  <!-- Left top star -->
+  <polygon points="122,25 124.5,32 132,32 126,36.5 128,43.5 122,39 116,43.5 118,36.5 112,32 119.5,32" fill="url(#goldGrad)" />
+  <!-- Right top star -->
+  <polygon points="178,25 180.5,32 188,32 182,36.5 184,43.5 178,39 172,43.5 174,36.5 168,32 175.5,32" fill="url(#goldGrad)" />
+
+  <!-- Laurel Wreath Left Side -->
+  <g fill="url(#goldGrad)">
+    <path d="M 125,55 C 105,70 92,95 88,125 C 85,155 95,185 115,208 C 113,198 107,185 106,170 C 104,150 110,130 120,110 C 128,95 132,80 125,55 Z" />
+    <path d="M 118,65 C 98,62 88,72 82,85 C 88,85 102,80 115,75 Z" />
+    <path d="M 102,95 C 82,95 72,110 68,125 C 75,125 90,115 102,108 Z" />
+    <path d="M 98,135 C 78,140 70,160 68,175 C 75,170 90,155 100,148 Z" />
+    <path d="M 104,175 C 88,185 82,205 85,220 C 92,212 104,198 112,188 Z" />
+    <path d="M 120,205 C 110,220 108,238 118,250 C 122,238 126,225 128,215 Z" />
+  </g>
+
+  <!-- Laurel Wreath Right Side -->
+  <g fill="url(#goldGrad)">
+    <path d="M 175,55 C 195,70 208,95 212,125 C 215,155 205,185 185,208 C 187,198 193,185 194,170 C 196,150 190,130 180,110 C 172,95 168,80 175,55 Z" />
+    <path d="M 182,65 C 202,62 212,72 218,85 C 212,85 198,80 185,75 Z" />
+    <path d="M 198,95 C 218,95 228,110 232,125 C 225,125 210,115 198,108 Z" />
+    <path d="M 202,135 C 222,140 230,160 232,175 C 225,170 210,155 200,148 Z" />
+    <path d="M 196,175 C 212,185 218,205 215,220 C 208,212 196,198 188,188 Z" />
+    <path d="M 180,205 C 190,220 192,238 182,250 C 178,238 174,225 172,215 Z" />
+  </g>
+
+  <!-- Bottom Center Star -->
+  <polygon points="150,232 153.5,242.5 164.5,242.5 155.5,249 159,259.5 150,253 141,259.5 144.5,249 135.5,242.5 146.5,242.5" fill="url(#goldGrad)" />
+
+  <!-- Shield Outline -->
+  <path d="M 150,52 C 195,52 205,72 205,108 C 205,160 175,195 150,210 C 125,195 95,160 95,108 C 95,72 105,52 150,52 Z" fill="none" stroke="url(#navyGrad)" stroke-width="5" />
+
+  <!-- Monogram 'B' Inside Shield -->
+  <path d="M 122,82 L 152,82 C 168,82 178,90 178,104 C 178,115 170,122 158,124 C 172,127 182,135 182,150 C 182,166 168,175 148,175 L 122,175 Z M 138,96 L 138,118 L 150,118 C 158,118 164,113 164,107 C 164,100 158,96 150,96 Z M 138,132 L 138,161 L 150,161 C 160,161 166,155 166,146 C 166,138 160,132 150,132 Z" fill="url(#navyGrad)" />
+
+  <!-- Text: BELHEKAR -->
+  <text x="150" y="284" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-weight="900" font-size="28" fill="#1b365d" text-anchor="middle" letter-spacing="2">BELHEKAR</text>
+
+  <!-- Text: GROUP OF INSTITUTES -->
+  <text x="150" y="308" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="14" fill="#c5a059" text-anchor="middle" letter-spacing="4">GROUP OF INSTITUTES</text>
+</svg>
