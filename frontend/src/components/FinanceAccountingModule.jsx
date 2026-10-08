@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   DollarSign,
@@ -106,11 +107,11 @@ export default function FinanceAccountingModule({ selectedInstitution, currentUs
       setLoading(true);
       const instId = selectedInstitution?.id || 1;
       const [sumRes, feesRes, expRes, schRes, stuRes] = await Promise.all([
-        fetch(`/api/accounts/summary?institution_id=${instId}`),
-        fetch(`/api/accounts/fees?institution_id=${instId}`),
-        fetch(`/api/accounts/expenditures?institution_id=${instId}`),
-        fetch(`/api/accounts/scholarships?institution_id=${instId}`),
-        fetch(`/api/students?institution_id=${instId}`)
+        apiFetch(`/api/accounts/summary?institution_id=${instId}`),
+        apiFetch(`/api/accounts/fees?institution_id=${instId}`),
+        apiFetch(`/api/accounts/expenditures?institution_id=${instId}`),
+        apiFetch(`/api/accounts/scholarships?institution_id=${instId}`),
+        apiFetch(`/api/students?institution_id=${instId}`)
       ]);
       const [sumData, feesData, expData, schData, stuData] = await Promise.all([
         sumRes.json(), feesRes.json(), expRes.json(), schRes.json(), stuRes.json()
@@ -144,7 +145,7 @@ export default function FinanceAccountingModule({ selectedInstitution, currentUs
 
   const handleSaveFee = async (e) => {
     e.preventDefault();
-    const res = await fetch('/api/accounts/fees', {
+    const res = await apiFetch('/api/accounts/fees', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...feeForm, institution_id: selectedInstitution?.id || 1, created_by: currentUser?.full_name || 'Account Officer' })
@@ -162,7 +163,7 @@ export default function FinanceAccountingModule({ selectedInstitution, currentUs
 
   const handleSaveExpense = async (e) => {
     e.preventDefault();
-    const res = await fetch('/api/accounts/expenditures', {
+    const res = await apiFetch('/api/accounts/expenditures', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...expenseForm, institution_id: selectedInstitution?.id || 1 })
@@ -171,7 +172,7 @@ export default function FinanceAccountingModule({ selectedInstitution, currentUs
   };
 
   const handleUpdateScholarship = async (id, inst1, inst2) => {
-    await fetch(`/api/accounts/scholarships/${id}`, {
+    await apiFetch(`/api/accounts/scholarships/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ inst1_status: inst1, inst2_status: inst2 })

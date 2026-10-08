@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   CalendarCheck,
@@ -57,11 +58,11 @@ export default function AttendanceModule({ selectedInstitution, currentUser, onS
       const instId = selectedInstitution?.id || 1;
 
       // 1. Fetch Students
-      const stuRes = await fetch(`/api/students?institution_id=${instId}`);
+      const stuRes = await apiFetch(`/api/students?institution_id=${instId}`);
       const stuData = await stuRes.json();
 
       // 2. Fetch Existing Attendance for this date
-      const attRes = await fetch(`/api/attendance/students?institution_id=${instId}&date=${selectedDate}`);
+      const attRes = await apiFetch(`/api/attendance/students?institution_id=${instId}&date=${selectedDate}`);
       const attData = await attRes.json();
 
       // Merge: For each student, find their attendance record or create default
@@ -101,12 +102,12 @@ export default function AttendanceModule({ selectedInstitution, currentUser, onS
       setStudentRows(merged);
 
       // 3. Fetch Faculty Attendance
-      const resFac = await fetch(`/api/attendance/faculty?institution_id=${instId}&date=${selectedDate}`);
+      const resFac = await apiFetch(`/api/attendance/faculty?institution_id=${instId}&date=${selectedDate}`);
       const dataFac = await resFac.json();
       setFacultyRows(dataFac);
 
       // 4. Fetch Devices
-      const resDev = await fetch('/api/biometrics/devices');
+      const resDev = await apiFetch('/api/biometrics/devices');
       const dataDev = await resDev.json();
       setDevices(dataDev);
     } catch (err) {
@@ -178,7 +179,7 @@ export default function AttendanceModule({ selectedInstitution, currentUser, onS
   const handleSaveStudentAttendance = async () => {
     try {
       setSaving(true);
-      const res = await fetch('/api/attendance/students', {
+      const res = await apiFetch('/api/attendance/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

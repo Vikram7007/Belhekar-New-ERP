@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   History,
@@ -18,7 +19,7 @@ export default function AuditTrailModule({ selectedInstitution, currentUser }) {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/audit-logs?institution_id=${selectedInstitution?.id || 1}&limit=100`);
+      const res = await apiFetch(`/api/audit-logs?institution_id=${selectedInstitution?.id || 1}&limit=100`);
       const data = await res.json();
       setLogs(data);
     } catch (err) {

@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   User,
@@ -103,7 +104,7 @@ export default function FacultyPersonalProfile({
       const username = currentUser?.username || 'faculty';
       const instId = selectedInstitution?.id || 1;
 
-      const res = await fetch(`/api/faculty/me?email=${encodeURIComponent(email)}&username=${encodeURIComponent(username)}&institution_id=${instId}`);
+      const res = await apiFetch(`/api/faculty/me?email=${encodeURIComponent(email)}&username=${encodeURIComponent(username)}&institution_id=${instId}`);
       if (res.ok) {
         const data = await res.json();
         setProfile(prev => ({
@@ -141,13 +142,13 @@ export default function FacultyPersonalProfile({
 
       let res;
       if (profile.id) {
-        res = await fetch(`/api/faculty/${profile.id}`, {
+        res = await apiFetch(`/api/faculty/${profile.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetch('/api/faculty', {
+        res = await apiFetch('/api/faculty', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

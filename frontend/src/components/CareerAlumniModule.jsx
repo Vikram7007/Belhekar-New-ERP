@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   Building2,
@@ -163,7 +164,7 @@ export default function CareerAlumniModule({ selectedInstitution, currentUser })
       setLoading(true);
       const instId = selectedInstitution?.id || 1;
 
-      const plcRes = await fetch(`/api/placements?institution_id=${instId}`);
+      const plcRes = await apiFetch(`/api/placements?institution_id=${instId}`);
       const plcData = await plcRes.json();
 
       // Ensure 5 high-fidelity mock placement records if few/empty
@@ -188,7 +189,7 @@ export default function CareerAlumniModule({ selectedInstitution, currentUser })
         setPlacements(defaultPlacements);
       }
 
-      const almRes = await fetch(`/api/alumni?institution_id=${instId}`);
+      const almRes = await apiFetch(`/api/alumni?institution_id=${instId}`);
       const almData = await almRes.json();
       setAlumni(almData && almData.length > 0 ? almData : [
         { id: 1, enrollment_no: 'ENR-20-80012', student_name: 'Amit Subhashrao Jagtap', department: 'MBA Finance', passing_year: '2022', current_company: 'Deloitte India', current_designation: 'Senior Financial Analyst', ctc_lpa: '12.5', higher_studies: 'CFA Level 2', email: 'amit.jagtap@gmail.com', mobile_no: '9822004411', city: 'Pune' },
@@ -208,7 +209,7 @@ export default function CareerAlumniModule({ selectedInstitution, currentUser })
   const handleSavePlacement = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/placements', {
+      const res = await apiFetch('/api/placements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -229,7 +230,7 @@ export default function CareerAlumniModule({ selectedInstitution, currentUser })
   const handleSaveAlumni = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/alumni', {
+      const res = await apiFetch('/api/alumni', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   Award,
@@ -45,12 +46,12 @@ export default function AcademicsExamModule({ selectedInstitution, currentUser }
       const instId = selectedInstitution?.id || 1;
 
       // 1. Fetch Students
-      const stuRes = await fetch(`/api/students?institution_id=${instId}`);
+      const stuRes = await apiFetch(`/api/students?institution_id=${instId}`);
       const stuData = await stuRes.json();
       setStudents(stuData);
 
       // 2. Fetch Existing Marks
-      const marksRes = await fetch(`/api/academics/marks?institution_id=${instId}&subject=${encodeURIComponent(subject)}`);
+      const marksRes = await apiFetch(`/api/academics/marks?institution_id=${instId}&subject=${encodeURIComponent(subject)}`);
       const marksData = await marksRes.json();
 
       // Merge students with their existing marks or initialize empty rows
@@ -112,7 +113,7 @@ export default function AcademicsExamModule({ selectedInstitution, currentUser }
   const handleSaveMarks = async () => {
     try {
       setSaving(true);
-      const res = await fetch('/api/academics/marks', {
+      const res = await apiFetch('/api/academics/marks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

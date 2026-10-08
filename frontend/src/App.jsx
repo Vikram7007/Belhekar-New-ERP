@@ -1,3 +1,4 @@
+import { apiFetch } from './api';
 import React, { useState, useEffect } from 'react';
 import Sidebar, { ROLE_PERMISSIONS } from './components/Sidebar';
 import Topbar from './components/Topbar';
@@ -30,7 +31,7 @@ export default function App() {
 
   // 1. Fetch Institutions on load
   useEffect(() => {
-    fetch('/api/institutions')
+    apiFetch('/api/institutions')
       .then(res => res.json())
       .then(data => {
         setInstitutions(data);
@@ -44,7 +45,7 @@ export default function App() {
   // 2. Fetch Dashboard Stats whenever selectedInstitution changes
   const fetchDashboardStats = () => {
     if (!selectedInstitution) return;
-    fetch(`/api/dashboard/stats?institution_id=${selectedInstitution.id}`)
+    apiFetch(`/api/dashboard/stats?institution_id=${selectedInstitution.id}`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Failed to load dashboard stats:', err));
@@ -86,7 +87,7 @@ export default function App() {
   const handleSyncBiometrics = async () => {
     try {
       setIsSyncingBiometrics(true);
-      const res = await fetch('/api/biometrics/sync', {
+      const res = await apiFetch('/api/biometrics/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ device_id: 1 })

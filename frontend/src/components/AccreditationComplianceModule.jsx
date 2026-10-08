@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck,
@@ -24,8 +25,8 @@ export default function AccreditationComplianceModule({ selectedInstitution, cur
       const instId = selectedInstitution?.id || 1;
 
       const [naacRes, nbaRes] = await Promise.all([
-        fetch(`/api/compliance/naac?institution_id=${instId}`),
-        fetch(`/api/compliance/nba?institution_id=${instId}`)
+        apiFetch(`/api/compliance/naac?institution_id=${instId}`),
+        apiFetch(`/api/compliance/nba?institution_id=${instId}`)
       ]);
 
       const [naacJson, nbaJson] = await Promise.all([

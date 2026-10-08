@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   Users,
@@ -70,7 +71,7 @@ export default function FacultyHRManagement({ selectedInstitution, currentUser, 
       setLoading(true);
       let url = `/api/faculty?institution_id=${selectedInstitution?.id || 1}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      const res = await fetch(url);
+      const res = await apiFetch(url);
       const data = await res.json();
       setFacultyList(data);
     } catch (err) {
@@ -83,7 +84,7 @@ export default function FacultyHRManagement({ selectedInstitution, currentUser, 
   const fetchPayroll = async () => {
     try {
       setPayrollLoading(true);
-      const res = await fetch(`/api/attendance/payroll?institution_id=${selectedInstitution?.id || 1}`);
+      const res = await apiFetch(`/api/attendance/payroll?institution_id=${selectedInstitution?.id || 1}`);
       const data = await res.json();
       setPayrollData(data);
     } catch (err) {
@@ -110,13 +111,13 @@ export default function FacultyHRManagement({ selectedInstitution, currentUser, 
 
       let res;
       if (formData.id) {
-        res = await fetch(`/api/faculty/${formData.id}`, {
+        res = await apiFetch(`/api/faculty/${formData.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetch('/api/faculty', {
+        res = await apiFetch('/api/faculty', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -138,7 +139,7 @@ export default function FacultyHRManagement({ selectedInstitution, currentUser, 
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete faculty record for ${name}?`)) return;
-    await fetch(`/api/faculty/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/faculty/${id}`, { method: 'DELETE' });
     fetchFaculty();
   };
 

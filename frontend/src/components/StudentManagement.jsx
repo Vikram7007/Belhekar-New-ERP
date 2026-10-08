@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   GraduationCap,
@@ -95,7 +96,7 @@ export default function StudentManagement({
       if (selectedDept) url += `&department=${encodeURIComponent(selectedDept)}`;
       if (selectedYear) url += `&year=${encodeURIComponent(selectedYear)}`;
 
-      const res = await fetch(url);
+      const res = await apiFetch(url);
       const data = await res.json();
       setStudents(data);
     } catch (err) {
@@ -120,13 +121,13 @@ export default function StudentManagement({
 
       let res;
       if (formData.id) {
-        res = await fetch(`/api/students/${formData.id}`, {
+        res = await apiFetch(`/api/students/${formData.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetch('/api/students', {
+        res = await apiFetch('/api/students', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -149,7 +150,7 @@ export default function StudentManagement({
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete student profile for "${name}"?`)) return;
     try {
-      const res = await fetch(`/api/students/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/students/${id}`, { method: 'DELETE' });
       if (res.ok) {
         alert('Student deleted successfully.');
         fetchStudents();
@@ -201,7 +202,7 @@ export default function StudentManagement({
     e.preventDefault();
     if (!activeStudent) return;
     try {
-      const res = await fetch(`/api/alumni/migrate/${activeStudent.id}`, {
+      const res = await apiFetch(`/api/alumni/migrate/${activeStudent.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(migrateData)

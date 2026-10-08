@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
@@ -67,11 +68,11 @@ export default function LibraryManagementModule({ selectedInstitution, currentUs
       const instId = selectedInstitution?.id || 1;
 
       const [bRes, jRes, cRes, sRes, fRes] = await Promise.all([
-        fetch(`/api/library/books?institution_id=${instId}`),
-        fetch(`/api/library/journals?institution_id=${instId}`),
-        fetch(`/api/library/circulation?institution_id=${instId}`),
-        fetch(`/api/students?institution_id=${instId}`),
-        fetch(`/api/faculty?institution_id=${instId}`)
+        apiFetch(`/api/library/books?institution_id=${instId}`),
+        apiFetch(`/api/library/journals?institution_id=${instId}`),
+        apiFetch(`/api/library/circulation?institution_id=${instId}`),
+        apiFetch(`/api/students?institution_id=${instId}`),
+        apiFetch(`/api/faculty?institution_id=${instId}`)
       ]);
 
       const [bData, jData, cData, sData, fData] = await Promise.all([
@@ -108,7 +109,7 @@ export default function LibraryManagementModule({ selectedInstitution, currentUs
   const handleSaveBook = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/library/books', {
+      const res = await apiFetch('/api/library/books', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...bookForm, institution_id: selectedInstitution?.id || 1 })
@@ -126,7 +127,7 @@ export default function LibraryManagementModule({ selectedInstitution, currentUs
   const handleSaveJournal = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/library/journals', {
+      const res = await apiFetch('/api/library/journals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...journalForm, institution_id: selectedInstitution?.id || 1 })
@@ -144,7 +145,7 @@ export default function LibraryManagementModule({ selectedInstitution, currentUs
   const handleIssueItem = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/library/issue', {
+      const res = await apiFetch('/api/library/issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...issueForm, institution_id: selectedInstitution?.id || 1 })
@@ -165,7 +166,7 @@ export default function LibraryManagementModule({ selectedInstitution, currentUs
   const handleReturnItem = async (circId) => {
     if (!window.confirm('Confirm return of this library book / journal?')) return;
     try {
-      const res = await fetch('/api/library/return', {
+      const res = await apiFetch('/api/library/return', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ circulation_id: circId })

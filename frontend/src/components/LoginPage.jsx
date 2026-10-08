@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState } from 'react';
 import {
   Building2,
@@ -50,7 +51,7 @@ export default function LoginPage({ institutions, onLoginSuccess }) {
       setLoading(true);
       setErrorMsg('');
 
-      const res = await fetch('/api/auth/login', {
+      const res = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

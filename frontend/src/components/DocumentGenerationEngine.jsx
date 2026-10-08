@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   FileCheck2,
@@ -46,7 +47,7 @@ export default function DocumentGenerationEngine({
 
   // Load students for dropdown
   useEffect(() => {
-    fetch(`/api/students?institution_id=${selectedInstitution?.id || 1}`)
+    apiFetch(`/api/students?institution_id=${selectedInstitution?.id || 1}`)
       .then(res => res.json())
       .then(data => {
         setStudents(data);
@@ -83,7 +84,7 @@ export default function DocumentGenerationEngine({
 
   const handleSaveToAudit = async () => {
     try {
-      await fetch('/api/documents/save', {
+      await apiFetch('/api/documents/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

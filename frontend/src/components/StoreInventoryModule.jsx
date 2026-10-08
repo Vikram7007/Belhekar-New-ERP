@@ -1,3 +1,4 @@
+import { apiFetch } from '../api';
 import React, { useState, useEffect } from 'react';
 import {
   Package,
@@ -56,11 +57,11 @@ export default function StoreInventoryModule({ selectedInstitution, currentUser 
       setLoading(true);
       const instId = selectedInstitution?.id || 1;
 
-      const invRes = await fetch(`/api/store/inventory?institution_id=${instId}`);
+      const invRes = await apiFetch(`/api/store/inventory?institution_id=${instId}`);
       const invData = await invRes.json();
       setInventoryList(invData);
 
-      const distRes = await fetch(`/api/store/distributions?institution_id=${instId}`);
+      const distRes = await apiFetch(`/api/store/distributions?institution_id=${instId}`);
       const distData = await distRes.json();
       setDistList(distData);
     } catch (err) {
@@ -77,7 +78,7 @@ export default function StoreInventoryModule({ selectedInstitution, currentUser 
   const handleSaveInward = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/store/inventory', {
+      const res = await apiFetch('/api/store/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -100,7 +101,7 @@ export default function StoreInventoryModule({ selectedInstitution, currentUser 
     e.preventDefault();
     if (!selectedItemForDist) return;
     try {
-      const res = await fetch('/api/store/distributions', {
+      const res = await apiFetch('/api/store/distributions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
