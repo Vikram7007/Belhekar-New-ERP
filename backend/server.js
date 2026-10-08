@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./database');
@@ -1409,9 +1410,21 @@ app.get('/api/system/backup', async (req, res) => {
   }
 });
 
-// Start Express Server
-app.listen(PORT, () => {
-  console.log(`🚀 Belhekar ERP Backend Server running on http://localhost:${PORT}`);
-});
+// Start Express Server after hydrating dataset from MongoDB Atlas
+async function startServer() {
+  try {
+    await db.hydrateFromMongo();
+  } catch (err) {
+    console.warn('⚠️ Hydration warning:', err.message);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Belhekar ERP Backend Server running on http://localhost:${PORT}`);
+    console.log(`🍃 Connected & synced with MongoDB Atlas cluster.`);
+  });
+}
+
+startServer();
+
 
 

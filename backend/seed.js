@@ -1,3 +1,4 @@
+require('dotenv').config();
 const db = require('./database');
 
 function seedDatabase() {
@@ -400,53 +401,36 @@ function seedDatabase() {
     console.log('✅ Seeded Audit logs.');
   }
 
-  // 13. Sync to MongoDB (Mongoose)
-  syncToMongoDB();
-
-  console.log('🎉 Belhekar ERP Database seeding completed flawlessly!');
+  // 13. Sync all 19 collections to MongoDB Atlas
+  syncToMongoDB().then(() => {
+    console.log('🎉 Belhekar ERP Database seeding completed flawlessly!');
+    process.exit(0);
+  });
 }
 
 async function syncToMongoDB() {
   try {
     const mongo = require('./mongo');
-    if (!mongo || !mongo.mongoose || mongo.mongoose.connection.readyState !== 1) {
-      console.log('ℹ️ MongoDB connection not active yet, skipping Mongoose sync.');
-      return;
+    if (mongo.mongoose.connection.readyState !== 1) {
+      console.log('🍃 Waiting for MongoDB Atlas connection...');
+      await new Promise(r => mongo.mongoose.connection.once('open', r));
     }
 
-    const instCount = await mongo.Institution.countDocuments();
-    if (instCount === 0) {
-      console.log('🍃 Syncing SQLite dataset to MongoDB Mongoose collections...');
-      const insts = db.prepare('SELECT * FROM institutions').all();
-      await mongo.Institution.insertMany(insts);
-
-      const users = db.prepare('SELECT * FROM users').all();
-      await mongo.User.insertMany(users);
-
-      const students = db.prepare('SELECT * FROM students').all();
-      await mongo.Student.insertMany(students);
-
-      const faculty = db.prepare('SELECT * FROM faculty').all();
-      await mongo.Faculty.insertMany(faculty);
-
-      const feePayments = db.prepare('SELECT * FROM fee_payments').all();
-      await mongo.FeePayment.insertMany(feePayments);
-
-      const expenditures = db.prepare('SELECT * FROM expenditures').all();
-      await mongo.Expenditure.insertMany(expenditures);
-
-      const storeInv = db.prepare('SELECT * FROM store_inventory').all();
-      await mongo.StoreInventory.insertMany(storeInv);
-
-      const libBooks = db.prepare('SELECT * FROM library_books').all();
-      await mongo.LibraryBook.insertMany(libBooks);
-
-      console.log('✅ MongoDB Mongoose collections populated successfully!');
+    console.log('🍃 Syncing dataset to MongoDB Atlas collections...');
+    for (const [table, Model] of Object.entries(mongo.modelsMap)) {
+      const rows = db.originalPrepare(`SELECT * FROM ${table}`).all();
+      if (rows.length > 0) {
+        await Model.deleteMany({});
+        await Model.insertMany(rows);
+        console.log(` ✅ ${table}: ${rows.length} records saved to MongoDB Atlas`);
+      }
     }
+    console.log('✅ All 19 collections populated in MongoDB Atlas successfully!');
   } catch (err) {
     console.warn('MongoDB sync note:', err.message);
   }
 }
 
 seedDatabase();
+
 

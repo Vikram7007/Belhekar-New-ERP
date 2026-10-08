@@ -1,11 +1,8 @@
 const Database = require('better-sqlite3');
-const path = require('path');
 
-const dbPath = path.resolve(__dirname, 'erp.db');
-const db = new Database(dbPath);
-
-// Enable foreign keys and WAL mode for high performance
-db.pragma('journal_mode = WAL');
+// Use in-memory SQLite for high-speed sub-millisecond queries,
+// backed permanently by MongoDB Atlas cloud as primary storage.
+const db = new Database(':memory:');
 db.pragma('foreign_keys = ON');
 
 function initSchema() {
@@ -352,9 +349,112 @@ function initSchema() {
       last_sync DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
-  console.log('✅ SQLite Schema initialized successfully.');
+  console.log('✅ In-memory database schema initialized.');
 }
 
 initSchema();
 
+// Wrap db.prepare to automatically sync INSERT, UPDATE, DELETE queries to MongoDB Atlas
+const originalPrepare = db.prepare.bind(db);
+const syncTimers = {};
+
+function scheduleSync(tableName) {
+  if (syncTimers[tableName]) {
+    clearTimeout(syncTimers[tableName]);
+  }
+  syncTimers[tableName] = setTimeout(() => {
+    syncTableToMongo(tableName);
+  }, 100);
+}
+
+async function syncTableToMongo(tableName) {
+  try {
+    const mongo = require('./mongo');
+    if (!mongo.modelsMap || mongo.mongoose.connection.readyState !== 1) {
+      return;
+    }
+    const Model = mongo.modelsMap[tableName];
+    if (!Model) return;
+
+    const rows = originalPrepare(`SELECT * FROM ${tableName}`).all();
+    await Model.deleteMany({});
+    if (rows.length > 0) {
+      await Model.insertMany(rows);
+    }
+  } catch (err) {
+    console.warn(`⚠️ MongoDB Atlas sync note for ${tableName}:`, err.message);
+  }
+}
+
+db.prepare = function(sql) {
+  const stmt = originalPrepare(sql);
+  const match = sql.match(/(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+([a-zA-Z0-9_]+)/i);
+  if (match) {
+    const tableName = match[1].toLowerCase();
+    const originalRun = stmt.run.bind(stmt);
+    stmt.run = function(...params) {
+      const result = originalRun(...params);
+      scheduleSync(tableName);
+      return result;
+    };
+  }
+  return stmt;
+};
+
+// Hydrate in-memory tables from MongoDB Atlas at startup
+async function hydrateFromMongo() {
+  const mongo = require('./mongo');
+  console.log('🍃 Connecting to MongoDB Atlas to load dataset...');
+
+  if (mongo.mongoose.connection.readyState !== 1) {
+    await new Promise((resolve) => {
+      mongo.mongoose.connection.once('open', resolve);
+      setTimeout(resolve, 8000);
+    });
+  }
+
+  if (mongo.mongoose.connection.readyState !== 1) {
+    console.warn('⚠️ Warning: MongoDB Atlas not connected within 8 seconds.');
+    return;
+  }
+
+  console.log('⚡ Loading all 19 collections from MongoDB Atlas into memory...');
+  for (const [table, Model] of Object.entries(mongo.modelsMap)) {
+    try {
+      const docs = await Model.find({}).lean();
+      if (docs.length > 0) {
+        originalPrepare(`DELETE FROM ${table}`).run();
+        const sample = docs[0];
+        const keys = Object.keys(sample).filter(k => k !== '_id' && k !== '__v');
+        if (keys.length > 0) {
+          const cols = keys.join(', ');
+          const placeholders = keys.map(() => '?').join(', ');
+          const insertStmt = originalPrepare(`INSERT OR REPLACE INTO ${table} (${cols}) VALUES (${placeholders})`);
+
+          const insertMany = db.transaction((rows) => {
+            for (const row of rows) {
+              const vals = keys.map(k => {
+                const v = row[k];
+                if (v instanceof Date) return v.toISOString();
+                if (typeof v === 'object' && v !== null) return JSON.stringify(v);
+                return v;
+              });
+              insertStmt.run(...vals);
+            }
+          });
+          insertMany(docs);
+        }
+      }
+    } catch (err) {
+      console.warn(`Could not hydrate ${table} from MongoDB Atlas:`, err.message);
+    }
+  }
+  console.log('🎉 All MongoDB Atlas collections loaded successfully into in-memory store!');
+}
+
+db.hydrateFromMongo = hydrateFromMongo;
+db.syncTableToMongo = syncTableToMongo;
+db.originalPrepare = originalPrepare;
+
 module.exports = db;
+

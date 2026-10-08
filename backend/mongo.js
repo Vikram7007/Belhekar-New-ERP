@@ -1,9 +1,10 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/belhekar_erp';
 
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('🍃 Connected to MongoDB via Mongoose successfully.'))
+  .then(() => console.log('🍃 Connected to MongoDB Atlas via Mongoose successfully.'))
   .catch(err => console.warn('⚠️ MongoDB connection note:', err.message));
 
 // 1. Institution Schema
@@ -333,6 +334,18 @@ const AuditLogSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
+// 19. Biometric Device Schema
+const BiometricDeviceSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
+  name: { type: String, required: true },
+  brand: { type: String, required: true },
+  ip_address: { type: String, required: true },
+  port: { type: Number, default: 4370 },
+  location: { type: String },
+  status: { type: String, default: 'Online' },
+  last_sync: { type: Date, default: Date.now }
+});
+
 // Models Export
 const Institution = mongoose.models.Institution || mongoose.model('Institution', InstitutionSchema);
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
@@ -352,6 +365,29 @@ const LibraryJournal = mongoose.models.LibraryJournal || mongoose.model('Library
 const LibraryCirculation = mongoose.models.LibraryCirculation || mongoose.model('LibraryCirculation', LibraryCirculationSchema);
 const GeneratedDocument = mongoose.models.GeneratedDocument || mongoose.model('GeneratedDocument', GeneratedDocumentSchema);
 const AuditLog = mongoose.models.AuditLog || mongoose.model('AuditLog', AuditLogSchema);
+const BiometricDevice = mongoose.models.BiometricDevice || mongoose.model('BiometricDevice', BiometricDeviceSchema);
+
+const modelsMap = {
+  institutions: Institution,
+  users: User,
+  students: Student,
+  faculty: Faculty,
+  student_attendance: StudentAttendance,
+  faculty_attendance: FacultyAttendance,
+  internal_marks: InternalMarks,
+  placement_records: PlacementRecord,
+  alumni_records: AlumniRecord,
+  fee_payments: FeePayment,
+  expenditures: Expenditure,
+  store_inventory: StoreInventory,
+  store_distributions: StoreDistribution,
+  library_books: LibraryBook,
+  library_journals: LibraryJournal,
+  library_circulation: LibraryCirculation,
+  generated_documents: GeneratedDocument,
+  audit_logs: AuditLog,
+  biometric_devices: BiometricDevice
+};
 
 module.exports = {
   mongoose,
@@ -372,5 +408,8 @@ module.exports = {
   LibraryJournal,
   LibraryCirculation,
   GeneratedDocument,
-  AuditLog
+  AuditLog,
+  BiometricDevice,
+  modelsMap
 };
+
