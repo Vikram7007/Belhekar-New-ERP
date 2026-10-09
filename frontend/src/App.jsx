@@ -14,7 +14,6 @@ import StoreInventoryModule from './components/StoreInventoryModule';
 import LibraryManagementModule from './components/LibraryManagementModule';
 import AccreditationComplianceModule from './components/AccreditationComplianceModule';
 import FacultyPersonalProfile from './components/FacultyPersonalProfile';
-import RoleSwitchModal from './components/RoleSwitchModal';
 import LoginPage from './components/LoginPage';
 
 export default function App() {
@@ -26,7 +25,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
   const [selectedStudentForDoc, setSelectedStudentForDoc] = useState(null);
-  const [showRoleModal, setShowRoleModal] = useState(false);
   const [isSyncingBiometrics, setIsSyncingBiometrics] = useState(false);
 
   // 1. Fetch Institutions on load
@@ -133,7 +131,6 @@ export default function App() {
           selectedInstitution={selectedInstitution}
           setSelectedInstitution={setSelectedInstitution}
           currentUser={currentUser}
-          setShowRoleModal={setShowRoleModal}
           onSyncBiometrics={handleSyncBiometrics}
           isSyncingBiometrics={isSyncingBiometrics}
         />
@@ -244,17 +241,6 @@ export default function App() {
           )}
         </main>
       </div>
-
-      {/* 7-Role Quick Switcher Modal */}
-      <RoleSwitchModal
-        show={showRoleModal}
-        onClose={() => setShowRoleModal(false)}
-        currentUser={currentUser}
-        onSelectUser={(newUser) => {
-          setCurrentUser(newUser);
-          setActiveTab('dashboard');
-        }}
-      />
     </div>
   );
 }
